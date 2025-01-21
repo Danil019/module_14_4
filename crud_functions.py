@@ -1,28 +1,36 @@
 import sqlite3
 
-connection = sqlite3.connect('database.db')
-cursor = connection.cursor()
+DB_NAME = 'database.db'
+
+def get_connection():
+    return sqlite3.connect(DB_NAME)
 
 def initiate_db():
-    cursor.execute('''
-    CREATE TABLE IF NOT EXISTS Products(
-    Id INTEGER PRIMARY KEY,
-    title TEXT NOT NULL,
-    description TEXT,
-    price INTEGER NOT NULL
-    )
-    ''')
-    connection.commit()
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS Products(
+                id INTEGER PRIMARY KEY,
+                title TEXT NOT NULL,
+                description TEXT,
+                price INTEGER NOT NULL
+            )
+        ''')
+        conn.commit()
 
 def add_products():
-    for i in range(4):
-        products_names = ['Яблоко', 'Авокадо', 'Яйцо', 'Апельсин']
-        cursor.execute("INSERT INTO Products (title, description, price) VALUES (?, ?, ?)",
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        for i in range(4):
+            products_names = ['Яблоко', 'Авокадо', 'Яйцо', 'Апельсин']
+            cursor.execute("INSERT INTO Products (title, description, price) VALUES (?, ?, ?)",
                        (f"{products_names[i]}", f"{products_names[i]}", (i + 1) * 100))
-    connection.commit()
+        conn.commit()
 
 def get_all_products():
-    cursor.execute(f"SELECT title, description, price FROM Products")
-    return cursor.fetchall()
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT title, description, price FROM Products")
+        return cursor.fetchall()
 
 print(get_all_products())
